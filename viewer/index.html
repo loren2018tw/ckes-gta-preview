@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>成功國小 3D 校園 v2</title>
+    <script type="module" src="./vendor/model-viewer.min.js"></script>
+    <style>
+      :root {
+        color-scheme: dark;
+        --ink: #f4f1e8;
+        --muted: #b9c2b4;
+        --panel: rgba(18, 26, 22, 0.82);
+        --line: rgba(244, 241, 232, 0.16);
+        --accent: #c46a4e;
+        --grass: #6f8558;
+      }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        overflow: hidden;
+        background:
+          radial-gradient(1200px 600px at 70% 20%, #31443a 0%, transparent 60%),
+          linear-gradient(160deg, #101713 0%, #1d2a22 55%, #2b3a2e 100%);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Noto Sans TC", "PingFang TC", sans-serif;
+      }
+      .stage {
+        position: relative;
+        height: 100%;
+        width: 100%;
+      }
+      model-viewer {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        --poster-color: transparent;
+      }
+      .topbar {
+        position: absolute;
+        top: 22px;
+        left: 22px;
+        right: 22px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        pointer-events: none;
+        z-index: 2;
+      }
+      .brand {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 14px 18px;
+        backdrop-filter: blur(10px);
+        max-width: 520px;
+      }
+      .eyebrow {
+        margin: 0 0 6px;
+        color: var(--muted);
+        font-size: 12px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+      h1 {
+        margin: 0;
+        font-size: clamp(20px, 3vw, 30px);
+        font-weight: 650;
+        letter-spacing: 0.02em;
+      }
+      .sub {
+        margin: 8px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: flex-end;
+        max-width: 360px;
+      }
+      .chip {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-size: 12px;
+        color: var(--muted);
+        backdrop-filter: blur(10px);
+        white-space: nowrap;
+      }
+      .chip strong { color: var(--ink); font-weight: 600; }
+      .hint {
+        position: absolute;
+        left: 50%;
+        bottom: 20px;
+        transform: translateX(-50%);
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 9px 16px;
+        color: var(--muted);
+        font-size: 12px;
+        backdrop-filter: blur(10px);
+        z-index: 2;
+        white-space: nowrap;
+      }
+      .footer {
+        position: absolute;
+        left: 22px;
+        bottom: 20px;
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.5;
+        z-index: 2;
+        max-width: 320px;
+      }
+      .footer a { color: var(--ink); }
+      .views {
+        position: absolute;
+        left: 50%;
+        bottom: 62px;
+        transform: translateX(-50%);
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+        z-index: 2;
+      }
+      .viewbtn {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--ink);
+        cursor: pointer;
+        font: inherit;
+        font-size: 12px;
+        padding: 8px 14px;
+        backdrop-filter: blur(10px);
+      }
+      .viewbtn:hover { border-color: rgba(244, 241, 232, 0.45); }
+      .viewbtn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+      @media (max-width: 760px) {
+        .topbar { top: 14px; left: 14px; right: 14px; flex-direction: column; }
+        .chips { justify-content: flex-start; max-width: none; }
+        .brand { max-width: none; }
+        .hint { bottom: 14px; font-size: 11px; }
+        .views { bottom: 48px; gap: 6px; }
+        .viewbtn { font-size: 11px; padding: 7px 11px; }
+        .footer { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="stage">
+      <model-viewer
+        src="../exports/ckes_v2.glb"
+        alt="成功國小 3D 校園 v2：A 棟與正門細節版，A 棟 1F 含走廊、房間、開放柱廊與 PL 階梯"
+        camera-controls
+        zoom-sensitivity="0.4"
+        camera-target="0m 5m 0m"
+        camera-orbit="35deg 52deg 300m"
+        auto-rotate
+        auto-rotate-delay="2500"
+        rotation-per-second="6deg"
+        shadow-intensity="1"
+        environment-image="neutral"
+        exposure="1.0"
+        touch-action="pan-y"
+        interaction-prompt="auto"
+        loading="eager"
+        min-camera-orbit="auto auto 4m"
+        max-camera-orbit="auto 88deg auto"
+      ></model-viewer>
+
+      <div class="topbar">
+        <div class="brand">
+          <p class="eyebrow">CKES · Campus World</p>
+          <h1>成功國小 3D 校園 v2</h1>
+          <p class="sub">
+            以 2021 竣工圖 DXF 校正；A 棟與正門群組已加入現場照片推估的細節模組，A 棟 1F 再加入平面圖推估的走廊與房間；西面為開放柱廊，PL 是降往操場的階梯看台。其他棟仍是量體。
+          </p>
+        </div>
+        <div class="chips">
+          <span class="chip"><strong>GLB</strong> 3.7 MB</span>
+          <span class="chip"><strong>262</strong> meshes</span>
+          <span class="chip"><strong>A 棟 1F</strong> 室內</span>
+        </div>
+      </div>
+
+      <div class="views" role="group" aria-label="視角">
+        <button class="viewbtn" type="button" data-view="all" aria-pressed="true">全校</button>
+        <button class="viewbtn" type="button" data-view="gate">正門</button>
+        <button class="viewbtn" type="button" data-view="a-east">A 棟東</button>
+        <button class="viewbtn" type="button" data-view="a-west">A 棟西</button>
+        <button class="viewbtn" type="button" data-view="a-south">A 棟南</button>
+        <button class="viewbtn" type="button" data-view="a-1f">A 棟 1F</button>
+      </div>
+
+      <div class="hint">拖曳旋轉 · 滾輪縮放 · 右鍵平移</div>
+      <div class="footer">
+        座標以竣工圖 DXF 為準；原點 = 田徑場內圈中心。<br />
+        母格式：glTF 2.0 / GLB · 建模核心：Blender + Python
+      </div>
+    </main>
+    <script>
+      const viewer = document.querySelector("model-viewer");
+      const views = {
+        all: { target: "0m 5m 0m", orbit: "35deg 52deg 300m", rotate: true, exposure: 1.0 },
+        gate: { target: "82.5m 2m 0m", orbit: "90deg 74deg 26m", rotate: false, exposure: 1.0 },
+        "a-east": { target: "55.7m 9m -2m", orbit: "90deg 72deg 32m", rotate: false, exposure: 1.0 },
+        "a-west": { target: "40m 7m 0m", orbit: "270deg 72deg 55m", rotate: false, exposure: 1.0 },
+        "a-south": { target: "45m 9m 45m", orbit: "0deg 72deg 32m", rotate: false, exposure: 1.0 },
+        "a-1f": { target: "41.45m 1.5m -30m", orbit: "0deg 89deg 65m", rotate: false, exposure: 0.55 },
+      };
+      const buttons = [...document.querySelectorAll(".viewbtn")];
+      function applyView(name) {
+        const view = views[name];
+        if (!view) return;
+        buttons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.view === name)));
+        viewer.autoRotate = view.rotate;
+        viewer.exposure = view.exposure ?? 1.0;
+        viewer.setAttribute("camera-target", view.target);
+        viewer.setAttribute("camera-orbit", view.orbit);
+      }
+      buttons.forEach((btn) => {
+        btn.addEventListener("click", () => applyView(btn.dataset.view));
+      });
+      const params = new URLSearchParams(location.search);
+      const initialView = params.get("view") || "all";
+      if (params.get("rotate") === "0" && views[initialView]) {
+        views[initialView].rotate = false;
+      }
+      applyView(initialView);
+    </script>
+  </body>
+</html>
