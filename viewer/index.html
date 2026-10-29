@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <title>成功國小 3D 校園 v2</title>
+    <link rel="icon" href="data:," />
+    <style>
+      :root {
+        color-scheme: dark;
+        --ink: #f4f1e8;
+        --muted: #b9c2b4;
+        --panel: rgba(18, 26, 22, 0.82);
+        --line: rgba(244, 241, 232, 0.16);
+        --accent: #c46a4e;
+        --grass: #6f8558;
+      }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; overscroll-behavior: none; }
+      button { touch-action: manipulation; }
+      body {
+        margin: 0;
+        overflow: hidden;
+        background:
+          radial-gradient(1200px 600px at 70% 20%, #31443a 0%, transparent 60%),
+          linear-gradient(160deg, #101713 0%, #1d2a22 55%, #2b3a2e 100%);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Noto Sans TC", "PingFang TC", sans-serif;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .stage {
+        position: relative;
+        height: 100%;
+        width: 100%;
+        touch-action: none;
+      }
+      .scene {
+        position: absolute;
+        inset: 0;
+        display: block;
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        touch-action: none;
+      }
+      .topbar {
+        position: absolute;
+        top: 22px;
+        left: 22px;
+        right: 22px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        pointer-events: none;
+        z-index: 2;
+      }
+      .brandcol {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        max-width: 520px;
+      }
+      .brand {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 14px 18px;
+        backdrop-filter: blur(10px);
+      }
+      .eyebrow {
+        margin: 0 0 6px;
+        color: var(--muted);
+        font-size: 12px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+      h1 {
+        margin: 0;
+        font-size: clamp(20px, 3vw, 30px);
+        font-weight: 650;
+        letter-spacing: 0.02em;
+      }
+      .sub {
+        margin: 8px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .hud {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        pointer-events: auto;
+      }
+      .segmented {
+        display: flex;
+        gap: 2px;
+        padding: 3px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        backdrop-filter: blur(10px);
+      }
+      .segbtn {
+        border: 0;
+        border-radius: 999px;
+        padding: 6px 12px;
+        background: transparent;
+        color: var(--muted);
+        cursor: pointer;
+        font: inherit;
+        font-size: 12px;
+        line-height: 1.2;
+      }
+      .segbtn:hover { color: var(--ink); }
+      .segbtn[aria-pressed="true"] {
+        background: var(--accent);
+        color: #fff;
+        font-weight: 600;
+        cursor: default;
+      }
+      .segbtn:disabled { cursor: default; opacity: 0.45; }
+      .jumpbtns {
+        position: absolute;
+        top: 0;
+        right: 0;
+        display: none;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 8px;
+        max-width: calc(100vw - 36px);
+        pointer-events: none;
+      }
+      .jumpbtn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 7px 13px;
+        background: var(--panel);
+        color: var(--ink);
+        cursor: pointer;
+        font: inherit;
+        font-size: 12px;
+        line-height: 1.2;
+        pointer-events: auto;
+        backdrop-filter: blur(10px);
+      }
+      .jumpbtn::before { content: "⌖"; color: var(--accent); }
+      .jumpbtn:hover { border-color: var(--accent); }
+      .jumpbtn:disabled { cursor: default; opacity: 0.45; }
+      .stage.is-locked .jumpbtn { opacity: 0.85; }
+      .stage.is-locked .jumpbtn kbd {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+      }
+      .jumpbtn kbd {
+        font: inherit;
+        font-size: 10px;
+        line-height: 1;
+        padding: 2px 5px;
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        color: var(--muted);
+      }
+      .jumpbtn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+      .stage[data-mode="walk"] .jumpbtns { display: flex; }
+      .segbtn:focus-visible,
+      .chip:focus-visible,
+      .viewbtn:focus-visible {
+        outline: 2px solid var(--ink);
+        outline-offset: 2px;
+      }
+      .hud-status {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 8px 12px;
+        color: var(--muted);
+        font-size: 12px;
+        backdrop-filter: blur(10px);
+        max-width: 72vw;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        transition: opacity 0.45s ease;
+      }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: flex-end;
+        max-width: 360px;
+      }
+      .chip {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-size: 12px;
+        color: var(--muted);
+        backdrop-filter: blur(10px);
+        white-space: nowrap;
+      }
+      .chip strong { color: var(--ink); font-weight: 600; }
+      .hint {
+        position: absolute;
+        left: 50%;
+        bottom: 20px;
+        transform: translateX(-50%);
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 9px 16px;
+        color: var(--muted);
+        font-size: 12px;
+        backdrop-filter: blur(10px);
+        z-index: 2;
+        white-space: nowrap;
+        max-width: calc(100vw - 28px);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        pointer-events: none;
+        transition: opacity 0.45s ease;
+      }
+      .footer {
+        position: absolute;
+        left: 22px;
+        bottom: 20px;
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.5;
+        z-index: 2;
+        max-width: 320px;
+      }
+      .footer a { color: var(--ink); }
+      .views {
+        position: absolute;
+        left: 50%;
+        bottom: 62px;
+        transform: translateX(-50%);
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+        z-index: 2;
+      }
+
+      /* 沉浸模式只留模式鈕、位置名稱、準星與提示。 */
+      .stage[data-mode="walk"] .brand,
+      .stage[data-mode="walk"] .chips,
+      .stage[data-mode="walk"] .footer,
+      .stage[data-mode="walk"] .views { display: none; }
+      .stage[data-mode="walk"] .topbar { top: 18px; left: 18px; right: 18px; }
+      .stage.is-idle .hud-status,
+      .stage.is-idle .hint { opacity: 0; }
+
+      .crosshair {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 2px;
+        height: 2px;
+        margin: -1px 0 0 -1px;
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+        z-index: 3;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+      }
+      .stage.is-looking .crosshair { opacity: 0.9; }
+
+      .lock-prompt {
+        position: absolute;
+        left: 50%;
+        bottom: 68px;
+        transform: translateX(-50%);
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: rgba(18, 26, 22, 0.9);
+        border: 1px solid var(--line);
+        color: var(--ink);
+        font-size: 12px;
+        letter-spacing: 0.04em;
+        z-index: 3;
+        pointer-events: none;
+        white-space: nowrap;
+        transition: opacity 0.45s ease;
+      }
+      .lock-prompt[hidden] { display: none; }
+      .stage.is-idle .lock-prompt { opacity: 0; }
+
+      .joystick {
+        position: absolute;
+        left: calc(24px + env(safe-area-inset-left));
+        bottom: calc(24px + env(safe-area-inset-bottom));
+        width: 126px;
+        height: 126px;
+        border-radius: 50%;
+        border: 1px solid rgba(244, 241, 232, 0.28);
+        background: rgba(18, 26, 22, 0.28);
+        backdrop-filter: blur(3px);
+        z-index: 3;
+        display: none;
+        touch-action: none;
+      }
+      .stage[data-touch="1"][data-mode="walk"] .joystick { display: block; }
+      .joystick-knob {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 52px;
+        height: 52px;
+        margin: -26px 0 0 -26px;
+        border-radius: 50%;
+        border: 1px solid rgba(244, 241, 232, 0.4);
+        background: rgba(244, 241, 232, 0.16);
+        will-change: transform;
+      }
+      .joystick.is-active { border-color: rgba(244, 241, 232, 0.5); }
+
+      .debug {
+        position: absolute;
+        left: 18px;
+        top: 64px;
+        min-width: 196px;
+        padding: 9px 11px;
+        border-radius: 10px;
+        background: rgba(8, 12, 10, 0.78);
+        border: 1px solid var(--line);
+        color: var(--muted);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 11px;
+        line-height: 1.55;
+        z-index: 3;
+      }
+      .debug[hidden] { display: none; }
+      .debug-grid {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 1px 10px;
+      }
+      .debug-grid b {
+        color: var(--ink);
+        font-weight: 500;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+      .debugbtn {
+        margin-top: 7px;
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        padding: 4px 8px;
+        background: transparent;
+        color: var(--muted);
+        font: inherit;
+        font-size: 11px;
+        cursor: pointer;
+      }
+      .debugbtn[aria-pressed="true"] {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+      }
+      .debugbtn:disabled { opacity: 0.45; cursor: default; }
+      .viewbtn {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--ink);
+        cursor: pointer;
+        font: inherit;
+        font-size: 12px;
+        padding: 8px 14px;
+        backdrop-filter: blur(10px);
+      }
+      .viewbtn:hover { border-color: rgba(244, 241, 232, 0.45); }
+      .viewbtn:disabled { cursor: default; opacity: 0.5; }
+      .viewbtn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+      .overlay {
+        position: absolute;
+        inset: 0;
+        z-index: 5;
+        display: grid;
+        place-items: center;
+        background: rgba(8, 12, 10, 0.55);
+        backdrop-filter: blur(3px);
+        transition: opacity 0.35s ease;
+      }
+      .overlay[hidden] { display: none; }
+      .overlay.is-done { opacity: 0; pointer-events: none; }
+      .overlay-card {
+        width: min(420px, calc(100vw - 40px));
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 20px 22px;
+        box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
+      }
+      .overlay-title { margin: 0; font-size: 15px; font-weight: 600; }
+      .overlay-detail {
+        margin: 8px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.6;
+        overflow-wrap: anywhere;
+      }
+      .overlay-bar {
+        margin-top: 14px;
+        height: 3px;
+        border-radius: 999px;
+        background: rgba(244, 241, 232, 0.15);
+        overflow: hidden;
+      }
+      .overlay-fill {
+        display: block;
+        width: 0;
+        height: 100%;
+        background: var(--accent);
+        transition: width 0.2s ease;
+      }
+      .overlay.is-error .overlay-fill { background: #c56b6b; }
+      .overlay-retry { margin-top: 14px; }
+      @media (max-width: 760px) {
+        .topbar { top: 14px; left: 14px; right: 14px; flex-direction: column; }
+        .brandcol { max-width: none; width: 100%; }
+        .chips { justify-content: flex-start; max-width: none; }
+        .brand { max-width: none; }
+        .hint { bottom: 14px; font-size: 11px; }
+        .views { bottom: 48px; gap: 6px; }
+        .viewbtn { font-size: 11px; padding: 7px 11px; }
+        .footer { display: none; }
+        .stage[data-mode="walk"] .topbar { top: 12px; left: 12px; right: 12px; }
+        .stage[data-mode="walk"] .jumpbtns { top: 42px; right: 0; }
+        .hud { flex-wrap: wrap; }
+        .hud-status { max-width: calc(100vw - 190px); font-size: 11px; }
+        .joystick { width: 112px; height: 112px; left: 18px; bottom: 18px; }
+        .joystick-knob { width: 46px; height: 46px; margin: -23px 0 0 -23px; }
+        .lock-prompt { bottom: 58px; font-size: 11px; }
+        .debug { left: 12px; top: 58px; font-size: 10px; min-width: 178px; }
+      }
+    </style>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "./vendor/three.module.js",
+          "three/addons/": "./vendor/addons/"
+        }
+      }
+    </script>
+    <script type="module" src="./app.js"></script>
+  </head>
+  <body>
+    <main class="stage" data-mode="orbit">
+      <canvas id="scene" class="scene" aria-label="成功國小 3D 校園"></canvas>
+
+      <div class="topbar">
+        <div class="brandcol">
+          <div class="brand">
+            <p class="eyebrow">CKES · Campus World</p>
+            <h1>成功國小 3D 校園 v2</h1>
+            <p class="sub">
+              以 2021 竣工圖 DXF 校正；A 棟與正門群組加入現場照片推估的細節，A 棟 1F 與 B/C 棟 1F–4F 由平面圖建模；A 棟西面為開放柱廊，PL 是降往操場的階梯看台。其他棟仍是量體。
+            </p>
+          </div>
+          <div class="hud">
+            <div class="segmented" role="group" aria-label="模式切換">
+              <button
+                class="segbtn"
+                id="mode-orbit"
+                type="button"
+                data-mode="orbit"
+                aria-pressed="true"
+                aria-label="鳥瞰模式"
+              >鳥瞰</button>
+              <button
+                class="segbtn"
+                id="mode-walk"
+                type="button"
+                data-mode="walk"
+                aria-pressed="false"
+                aria-label="沉浸模式"
+                disabled
+              >沉浸</button>
+            </div>
+            <span class="hud-status" id="hud-status" role="status">鳥瞰 · 全校</span>
+          </div>
+        </div>
+        <div class="jumpbtns">
+          <button class="jumpbtn" id="walk-gate" type="button" data-spawn="gate" aria-label="快速移動到校門（滑鼠鎖定時按 G）" title="快速移動到校門（滑鼠鎖定時按 G）">校門<kbd>G</kbd></button>
+          <button class="jumpbtn" id="walk-bc" type="button" data-spawn="bc" aria-label="快速移動到 B/C 中庭（滑鼠鎖定時按 C）" title="快速移動到 B/C 中庭（滑鼠鎖定時按 C）">B/C 中庭<kbd>C</kbd></button>
+        </div>
+        <div class="chips">
+          <span class="chip"><strong>GLB</strong> 4.0 MB</span>
+          <span class="chip"><strong>195</strong> meshes</span>
+          <span class="chip"><strong>B/C 1F–4F</strong> 室內</span>
+        </div>
+      </div>
+
+      <div class="views" role="group" aria-label="視角">
+        <button class="viewbtn" type="button" data-view="all" aria-pressed="true">全校</button>
+        <button class="viewbtn" type="button" data-view="a">A 棟</button>
+        <button class="viewbtn" type="button" data-view="b">B 棟</button>
+        <button class="viewbtn" type="button" data-view="track">操場</button>
+        <button class="viewbtn" type="button" data-view="court">風雨球場</button>
+      </div>
+
+      <div class="hint" id="hint">拖曳旋轉 · 滾輪縮放 · 右鍵平移</div>
+      <div class="footer">
+        座標以竣工圖 DXF 為準；原點 = 田徑場內圈中心。<br />
+        母格式：glTF 2.0 / GLB · 建模核心：Blender + Python
+      </div>
+
+      <div class="crosshair" id="crosshair" aria-hidden="true"></div>
+      <div class="lock-prompt" id="lock-prompt" hidden>點擊畫面繼續</div>
+
+      <div class="joystick" id="joystick" aria-hidden="true">
+        <div class="joystick-knob" id="joystick-knob"></div>
+      </div>
+
+      <div class="debug" id="debug-panel" hidden>
+        <div class="debug-grid">
+          <span>FPS</span><b id="debug-fps">–</b>
+          <span>site</span><b id="debug-site">–</b>
+          <span>feet y</span><b id="debug-feet">–</b>
+          <span>zone</span><b id="debug-zone">–</b>
+          <span>blocked</span><b id="debug-blocked">–</b>
+        </div>
+        <button class="debugbtn" id="debug-wire" type="button" aria-pressed="false" disabled>碰撞線框（B）</button>
+      </div>
+
+      <div class="overlay" id="overlay" role="status" aria-live="polite">
+        <div class="overlay-card">
+          <p class="overlay-title" id="overlay-title">正在載入校園…</p>
+          <p class="overlay-detail" id="overlay-detail">讀取 exports/ckes_v2.glb…</p>
+          <div class="overlay-bar" aria-hidden="true"><span class="overlay-fill" id="overlay-fill"></span></div>
+          <button class="viewbtn overlay-retry" id="overlay-retry" type="button" hidden>重新載入</button>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
